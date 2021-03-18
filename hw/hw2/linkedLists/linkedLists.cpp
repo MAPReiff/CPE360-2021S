@@ -79,7 +79,7 @@ class linkedList {
 			head = temp->next; // head is now the next value of temp
 			cout << "Removed " << data << " at position " << pos
 				 << " from the list!" << endl;
-
+			count--;
 		 } else {
 			// if not head
 			Node *helper = head; //another temp
