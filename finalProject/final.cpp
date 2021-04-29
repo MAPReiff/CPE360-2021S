@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int currentTime = 0; //time in min
+int currentTime = 0; //store clock time in min
 int totalTime = 1020; //8am-1am = 1020min
 
 class Customer {
@@ -31,6 +31,10 @@ class Customer {
 class Queue {
   public:
    Customer *head;
+
+   Queue() {
+	  head = NULL;
+   }
 
    //add to queue (enqueue)
    void enqueue(int enter) {
@@ -125,13 +129,15 @@ int main() {
    int mostService[2] = {0, 0};
    int mostLineLenghth[2] = {0, 0};
 
+   int lineSize = 0;
+
    while (currentTime < totalTime) { //while it is in the allowed time
 	  // if (currentTime != 0) {
 	  currentTime++; //add a min
 	  cout << currentTime << endl;
 	  cout << "hit" << endl;
 
-	  int lineSize = line.queueSize();
+	  // int lineSize = line.queueSize();
 
 	  if (lineSize != 0) {
 		 //operate on existing customers in line
@@ -150,15 +156,16 @@ int main() {
 		 if (spawn <= 30) {
 			line.enqueue(currentTime);
 			totalCustomers++;
+			lineSize++;
 		 }
 	  } else if (
-		  currentTime > 120 &&
-		  currentTime <= 210) { //10am-11:30am=1.5h 120+90=210
+		  currentTime > 120 && currentTime <= 210) { //10-11:30=1.5h 120+90=210
 		 //0.1 prob
 		 spawn = rand() % 100 + 1;
 		 if (spawn <= 10) {
 			line.enqueue(currentTime);
 			totalCustomers++;
+			lineSize++;
 		 }
 	  } else if (
 		  currentTime > 210 && currentTime <= 330) { //11:30-1:30=2h 210+120=330
@@ -167,6 +174,7 @@ int main() {
 		 if (spawn <= 40) {
 			line.enqueue(currentTime);
 			totalCustomers++;
+			lineSize++;
 		 }
 	  } else if (
 		  currentTime > 330 && currentTime <= 570) { //1:30-5:30=4h 330+240=570
@@ -175,6 +183,7 @@ int main() {
 		 if (spawn <= 10) {
 			line.enqueue(currentTime);
 			totalCustomers++;
+			lineSize++;
 		 }
 	  } else if (
 		  currentTime > 570 && currentTime <= 720) { //5:30-8=2.5h 570+150=720
@@ -183,6 +192,7 @@ int main() {
 		 if (spawn <= 25) {
 			line.enqueue(currentTime);
 			totalCustomers++;
+			lineSize++;
 		 }
 	  } else if (
 		  currentTime > 720 && currentTime <= 900) { //8-11=3h 720+180=900
@@ -191,6 +201,7 @@ int main() {
 		 if (spawn <= 20) {
 			line.enqueue(currentTime);
 			totalCustomers++;
+			lineSize++;
 		 }
 	  } else if (
 		  currentTime > 900 && currentTime <= 1020) { //11-1am=2h 900+120=1020
@@ -199,12 +210,13 @@ int main() {
 		 if (spawn <= 10) {
 			line.enqueue(currentTime);
 			totalCustomers++;
+			lineSize++;
 		 }
 	  }
-	  //end spawn checking
+	  // //end spawn checking
 
-	  //logic
-	  //
-	  // }
+	  // //logic
+	  // //
+	  // // }
    }
 }
