@@ -1,3 +1,4 @@
+//I pledge my Honor that I have abided by the Stevens Honor System - Mitchell Reiff
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
@@ -8,10 +9,11 @@ int storeClock;
 
 class Customer {
   public:
-   int inTime;
-   int outTime;
-   int waitTime;
-   int orderTime;
+   int inTime; //enter at
+   int outTime; //leave at
+   int waitTime; //time in line
+   int orderTime; //length of order
+   int orderWaitTime; //same as above but not used to count
    Customer *next;
 
    Customer() {
@@ -19,6 +21,7 @@ class Customer {
 	  outTime = 0; //dont know yet
 	  waitTime = 0; //dont know yet
 	  orderTime = rand() % 6 + 1; //how long their order is 1-6min
+	  orderWaitTime = orderTime;
 	  next = NULL;
    }
 };
@@ -32,22 +35,21 @@ class Queue {
    }
 
    void enqueue() {
-	  Customer *temp = new Customer();
+	  Customer *tmp = new Customer();
 	  //code for qneue to add customer to the queue
-	  cout << "Just added a new customer to line: " << temp->inTime
-		   << " and order: " << temp->orderTime << endl;
-
+	  cout << "Just added a new customer to line: " << tmp->inTime
+		   << " and order: " << tmp->orderTime << endl;
 
 	  if (head == NULL) { //check if empty
-		 head = temp;
+		 head = tmp;
 	  } else {
 		 Customer *another;
 		 another = head;
 		 while (another->next != NULL) { //while the next one is not NULL
 			another = another->next; //set another to the next sub pointer
 		 }
-		 another->next = temp; //set the next sub pointer to be temp
-		 temp->next = NULL;
+		 another->next = tmp; //set the next sub pointer to be tmp
+		 tmp->next = NULL;
 	  }
    }
 
@@ -55,32 +57,55 @@ class Queue {
 	  if (head == NULL) { //check if queue is empty
 		 cout << "The queue is empty, nothing to delete" << endl;
 	  } else {
-		 Customer *temp;
-		 temp = head; //grab address of first Node
+		 Customer *tmp;
+		 tmp = head; //grab address of first Node
 		 head = head->next; //head moves to next Node
 		 cout << "At time " << storeClock << " a customer is leaving!" << endl;
-		 delete temp; //kills values stored in temp
+		 delete tmp; //kills values stored in tmp
 	  }
    }
 
-   //  int queueSize() { //check how many in line
-   //  }
+   int queueSize() { //check how many in line
+	  Customer *tmp;
+	  tmp = head;
+	  int length = 0;
+
+	  while (tmp != NULL) {
+		 length++;
+		 tmp = tmp->next; //set tmp to next sub pointer
+	  }
+	  return length;
+   }
+
+   void waitInLine() {
+	  Customer *tmp;
+	  tmp = head->next;
+	  while (tmp != NULL) {
+		 tmp->waitTime++; //add 1 to wait time
+		 tmp = tmp->next; //set tmp to next sub pointer
+	  }
+   }
 };
 
 int main() {
-   srand(time(NULL));
+   srand(time(NULL)); //seed random with run time
    Queue myStore;
 
-   int customerCount = 0;
-   int queueLength = 0;
-   int waitTimeSum = 0;
-   int serviceTimeSum = 0;
-   int minWaitTime = 99999;
-   int maxWaitTime = -1;
-   int minServiceTime = 99999;
-   int maxServiceTime = -1;
-   int spawnRand;
+   int customerCount = 0; //total customers
 
+   int queueLengthSum = 0; //sum of ALL lize size
+   int minQueueLength[2] = {99999, 0}; //least line size
+   int maxQueueLength[2] = {-1, 0}; //most line size
+
+   int waitTimeSum = 0; //sum of ALL times in line
+   int minWaitTime[2] = {99999, 0}; //least time in line
+   int maxWaitTime[2] = {-1, 0}; //most time in line
+
+   int serviceTimeSum = 0; //sum of ALL wait and order time
+   int minServiceTime[2] = {99999, 0}; //least time in line + order time
+   int maxServiceTime[2] = {-1, 0}; //most time in line + order time
+
+   int spawnRand;
 
    while (storeClock < 1020) { //while less than 1020min (8am-1am)
 	  storeClock++; //add a min
@@ -99,9 +124,7 @@ int main() {
 		 else {
 			cout << "No new customer at time " << storeClock << endl;
 		 }
-	  }
-
-	  else if (storeClock > 120 && storeClock <= 210) {
+	  } else if (storeClock > 120 && storeClock <= 210) {
 		 //lets check if a new customer will spawn
 		 spawnRand = rand() % 100 + 1;
 		 if (spawnRand <= 10) {
@@ -176,29 +199,159 @@ int main() {
 	  }
 
 	  else {
-		 //late night
+		 //past closing
+		 //this should never trigger due to while loop
 	  }
 
-	  if (myStore.head != NULL) {
+	  if (myStore.head != NULL) { //if there is a line
+		 if (myStore.head->next != NULL) {
+			myStore.waitInLine(); //add 1 min all wait times execpt head
+		 }
+	  }
+
+
+	  if (myStore.head != NULL) { //if someone is at head
 		 if (myStore.head->orderTime == 0) {
 			cout << "Customer departing" << endl;
+
+			int serviceTime = storeClock - myStore.head->inTime;
+			int waitTime = serviceTime - myStore.head->orderWaitTime;
+			int queueSize = myStore.queueSize();
+
+			if (minWaitTime[0] > waitTime) {
+			   //if record min wait is more than this
+			   minWaitTime[0] = waitTime;
+			   minWaitTime[1] = storeClock;
+			}
+			if (maxWaitTime[0] < waitTime) {
+			   //if record max wait is less than this
+			   maxWaitTime[0] = waitTime;
+			   maxWaitTime[1] = storeClock;
+			}
+
+			if (minServiceTime[0] > serviceTime) {
+			   //if record min service is more than this
+			   minServiceTime[0] = serviceTime;
+			   minServiceTime[1] = storeClock;
+			}
+			if (maxServiceTime[0] < serviceTime) {
+			   //if record max service is less than this
+			   maxServiceTime[0] = serviceTime;
+			   maxServiceTime[1] = storeClock;
+			}
+
+			if (minQueueLength[0] > queueSize) {
+			   //if record min queue is more than this
+			   minQueueLength[0] = queueSize;
+			   minQueueLength[1] = storeClock;
+			}
+			if (maxQueueLength[0] < queueSize) {
+			   //if record max queue is less than this
+			   maxQueueLength[0] = queueSize;
+			   maxQueueLength[1] = storeClock;
+			}
+
+			//add current values to sum vars
+			waitTimeSum += waitTime;
+			serviceTimeSum += serviceTime;
+			queueLengthSum += queueSize;
+
 			myStore.dequeue();
 		 } else {
 			myStore.head->orderTime--;
 		 }
 	  }
+   }
 
-	  //1. is a new person going to spawn?
-	  //		if yes, enqueue
-	  //2. is a new customer done with an order this min?
-	  //		if yes, dequeue
-	  //3. check vital states: wait time, service time, queue length
+   //after closing, keep going till line is empty
+
+   cout << "People in left in line at closing: " << myStore.queueSize() << endl;
+   while (myStore.queueSize() != 0) {
+	  storeClock++; //add a min
+
+	  if (myStore.head != NULL) {
+		 if (myStore.head->next != NULL) {
+			myStore.waitInLine(); //add 1 min all wait times execpt head
+		 }
+	  }
+
+	  if (myStore.head != NULL) { //if someone is at head
+		 if (myStore.head->orderTime == 0) {
+			cout << "Customer departing" << endl;
+
+			int serviceTime = storeClock - myStore.head->inTime;
+			int waitTime = serviceTime - myStore.head->orderWaitTime;
+			int queueSize = myStore.queueSize();
+
+			if (minWaitTime[0] > waitTime) {
+			   //if record min wait is more than this
+			   minWaitTime[0] = waitTime;
+			   minWaitTime[1] = storeClock;
+			}
+			if (maxWaitTime[0] < waitTime) {
+			   //if record max wait is less than this
+			   maxWaitTime[0] = waitTime;
+			   maxWaitTime[1] = storeClock;
+			}
+
+			if (minServiceTime[0] > serviceTime) {
+			   //if record min service is more than this
+			   minServiceTime[0] = serviceTime;
+			   minServiceTime[1] = storeClock;
+			}
+			if (maxServiceTime[0] < serviceTime) {
+			   //if record max service is less than this
+			   maxServiceTime[0] = serviceTime;
+			   maxServiceTime[1] = storeClock;
+			}
+
+			if (minQueueLength[0] > queueSize) {
+			   minQueueLength[0] = queueSize;
+			   minQueueLength[1] = storeClock;
+			}
+			if (maxQueueLength[0] < queueSize) {
+			   maxQueueLength[0] = queueSize;
+			   maxQueueLength[1] = storeClock;
+			}
+
+			waitTimeSum += waitTime;
+			serviceTimeSum += serviceTime;
+			queueLengthSum += queueSize;
+
+			myStore.dequeue();
+		 } else {
+			myStore.head->orderTime--;
+		 }
+	  }
    }
 
 
-   //this is when you get to print the final stats
-   //1. avg customer wait time
-   //2. avg customer service time
-   //3. avg queue length
-   //4. best and worst case and WHEN it happened
+   cout << "People in left in line: " << myStore.queueSize() << endl;
+
+   cout << endl << "==========Avg==========" << endl;
+   cout << "Avg wait time: " << (double)waitTimeSum / customerCount << endl;
+   cout << "Avg service time: " << (double)serviceTimeSum / customerCount
+		<< endl;
+   cout << "Avg queue size: " << (double)queueLengthSum / storeClock << endl;
+
+   cout << "==========Best==========" << endl;
+   cout << "Min wait time: " << minWaitTime[0] << " at time " << minWaitTime[1]
+		<< endl;
+   cout << "Min service time: " << minServiceTime[0] << " at time "
+		<< minServiceTime[1] << endl;
+   cout << "Min queue size: " << minQueueLength[0] << " at time "
+		<< minQueueLength[1] << endl;
+
+   cout << "==========Worst==========" << endl;
+   cout << "Max wait time: " << maxWaitTime[0] << " at time " << maxWaitTime[1]
+		<< endl;
+   cout << "Max service time: " << maxServiceTime[0] << " at time "
+		<< maxServiceTime[1] << endl;
+   cout << "Max queue size: " << maxQueueLength[0] << " at time "
+		<< maxQueueLength[1] << endl;
+
+   cout << "==========Total==========" << endl;
+   cout << "Total wait time: " << waitTimeSum << endl;
+   cout << "Total service time: " << serviceTimeSum << endl;
+   cout << "Total customers: " << customerCount << endl;
 }
