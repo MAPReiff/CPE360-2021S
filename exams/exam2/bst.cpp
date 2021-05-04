@@ -266,18 +266,18 @@ int main() {
    BST myTree;
 
    // dummy testing values
-   myTree.addNode(30);
-   myTree.addNode(15);
-   myTree.addNode(60);
-   myTree.addNode(7);
-   myTree.addNode(22);
-   myTree.addNode(17);
-   myTree.addNode(27);
-   myTree.addNode(45);
-   myTree.addNode(75);
-   myTree.addNode(100);
-   myTree.addNode(200);
-   myTree.addNode(250);
+   //  myTree.addNode(30);
+   //  myTree.addNode(15);
+   //  myTree.addNode(60);
+   //  myTree.addNode(7);
+   //  myTree.addNode(22);
+   //  myTree.addNode(17);
+   //  myTree.addNode(27);
+   //  myTree.addNode(45);
+   //  myTree.addNode(75);
+   //  myTree.addNode(100);
+   //  myTree.addNode(200);
+   //  myTree.addNode(250);
 
    while (1) {
 	  cout << "Press 1 to add a value" << endl;
